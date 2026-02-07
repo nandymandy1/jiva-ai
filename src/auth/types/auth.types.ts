@@ -4,6 +4,7 @@ export type LoginResponse = {
 };
 
 export type JwtPayload = {
-  sub: string; // clientId
+  sub: string; // _id
   name: string;
+  clientId: string;
 };

@@ -14,6 +14,7 @@ import { SeederModule } from '@/seeder/seeder.module';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
+import { WebhooksModule } from './webhooks/webhooks.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { APP_GUARD } from '@nestjs/core';
     DatabaseModule.forRootWithConfig(),
     RedisModule.forRootWithConfig(),
     QueueModule.forRootWithConfig(),
+    WebhooksModule,
   ],
   controllers: [AppController],
   providers: [

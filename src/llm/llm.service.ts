@@ -1,4 +1,3 @@
-import type { BaseDataResponse } from '@/common/types/base-response.types';
 import { JOB_TYPES, QUEUE_NAMES } from '@/queue/constants/queue.constants';
 import { QueueService } from '@/queue/queue.service';
 import { HttpService } from '@nestjs/axios';
@@ -6,7 +5,10 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { firstValueFrom } from 'rxjs';
 import { CreateGenerationDto } from './dto/create-generation.dto';
-import type { OllamaTagsResponse } from './types/ollama.types';
+import type {
+  GenerateResponse,
+  OllamaTagsResponse,
+} from './types/ollama.types';
 
 @Injectable()
 export class LlmService {
@@ -18,19 +20,17 @@ export class LlmService {
     private readonly httpService: HttpService,
   ) {}
 
-  getAiConfig() {
+  getAiConfig(): string {
     const baseUrl = this.configService.get<string>(
       'AI_BASE_URL',
       'http://localhost:11434/api',
     );
 
-    return {
-      baseUrl,
-    };
+    return baseUrl;
   }
 
   async checkHealth(): Promise<OllamaTagsResponse> {
-    const { baseUrl } = this.getAiConfig();
+    const baseUrl = this.getAiConfig();
     const { data } = await firstValueFrom(
       this.httpService.get<OllamaTagsResponse>(`${baseUrl}/tags`),
     );
@@ -39,7 +39,8 @@ export class LlmService {
 
   async generate(
     createGenerationDto: CreateGenerationDto,
-  ): Promise<BaseDataResponse<{ jobId: string }>> {
+    clientId: string,
+  ): Promise<GenerateResponse> {
     const { prompt, metadata } = createGenerationDto;
     const jobId = `llm-${Date.now()}`;
 
@@ -50,6 +51,7 @@ export class LlmService {
         {
           prompt,
           metadata,
+          clientId,
         },
         {
           jobId,
@@ -59,13 +61,11 @@ export class LlmService {
 
       return {
         success: true,
-        message: 'LLM generation job queued successfully',
-        data: {
-          jobId,
-        },
+        data: { jobId },
+        message: 'Generation job queued successfully',
       };
     } catch (error) {
-      this.logger.error('Failed to queue LLM generation job', error);
+      this.logger.error('Failed to queue generation job', error);
       throw error;
     }
   }

@@ -1,3 +1,5 @@
+import type { BaseDataResponse } from '@/common/types/base-response.types';
+
 export type OllamaModelDetails = {
   parent_model: string;
   format: string;
@@ -19,3 +21,5 @@ export type OllamaModel = {
 export type OllamaTagsResponse = {
   models: OllamaModel[];
 };
+
+export type GenerateResponse = BaseDataResponse<{ jobId: string }>;

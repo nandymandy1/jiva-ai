@@ -46,8 +46,8 @@ export class AppsController {
     };
   }
 
-  @UseGuards(JwtAuthGuard)
   @Get('profile')
+  @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get app profile (protected)' })
   @ApiResponse({

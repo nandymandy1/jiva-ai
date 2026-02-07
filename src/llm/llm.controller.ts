@@ -1,4 +1,4 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Post, UseGuards, Request } from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
@@ -8,7 +8,8 @@ import {
 import { JwtAuthGuard } from '@/auth/guards/jwt-auth.guard';
 import { LlmService } from './llm.service';
 import { CreateGenerationDto } from './dto/create-generation.dto';
-import { BaseDataResponse } from '@/common/types/base-response.types';
+import type { GenerateResponse } from './types/ollama.types';
+import { AuthRequest } from '@/common/types/request.types';
 
 @ApiTags('LLM')
 @Controller('llm')
@@ -24,8 +25,10 @@ export class LlmController {
     description: 'Generation request queued successfully.',
   })
   async generate(
+    @Request() req: AuthRequest,
     @Body() createGenerationDto: CreateGenerationDto,
-  ): Promise<BaseDataResponse<{ jobId: string }>> {
-    return this.llmService.generate(createGenerationDto);
+  ): Promise<GenerateResponse> {
+    const requestingClientId = req.user.clientId;
+    return this.llmService.generate(createGenerationDto, requestingClientId);
   }
 }

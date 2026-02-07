@@ -29,8 +29,12 @@ export class AppsService {
     });
 
     return {
-      ...newApp.toObject(),
-      clientId,
+      name: newApp.name,
+      clientId: newApp.clientId,
+      isActive: newApp.isActive,
+      createdAt: newApp.createdAt,
+      updatedAt: newApp.updatedAt,
+      _id: newApp._id.toString(),
       clientSecret,
     };
   }
@@ -40,17 +44,10 @@ export class AppsService {
     clientSecret: string,
   ): Promise<App | null> {
     const app = await this.appModel.findOne({ clientId }).lean();
-    if (!app) {
-      return null;
-    }
-    if (!app.isActive) {
-      return null;
-    }
-
+    if (!app) return null;
+    if (!app.isActive) return null;
     const isMatch = await bcrypt.compare(clientSecret, app.clientSecret);
-    if (isMatch) {
-      return app;
-    }
+    if (isMatch) return app;
     return null;
   }
 
@@ -74,6 +71,7 @@ export class AppsService {
       isActive: app.isActive,
       createdAt: app.createdAt,
       updatedAt: app.updatedAt,
+      _id: app._id.toString(),
     };
 
     await this.redisService.setJson(cacheKey, appResponse, this.CACHE_TTL);
@@ -99,6 +97,7 @@ export class AppsService {
       isActive: app.isActive,
       createdAt: app.createdAt,
       updatedAt: app.updatedAt,
+      _id: app._id.toString(),
     };
   }
 

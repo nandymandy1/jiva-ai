@@ -1,54 +1,42 @@
-import { Injectable, OnApplicationBootstrap, Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { ConfigService } from '@nestjs/config';
-import { SampleApps } from './data/apps';
 import { App } from '@/models/app.model';
-import * as crypto from 'crypto';
 
 @Injectable()
-export class SeederService implements OnApplicationBootstrap {
+export class SeederService {
   private readonly logger = new Logger(SeederService.name);
 
-  constructor(
-    @InjectModel(App.name) private readonly appModel: Model<App>,
-    private readonly configService: ConfigService,
-  ) {}
+  constructor(@InjectModel(App.name) private readonly appModel: Model<App>) {}
 
-  async onApplicationBootstrap() {
-    const nodeEnv = this.configService.get<string>('NODE_ENV');
-    if (nodeEnv !== 'development') {
-      this.logger.log('Seeder skipped: Not in development mode');
-      return;
-    }
-
+  async seed() {
     await this.seedApps();
   }
 
   private async seedApps() {
-    this.logger.log('Checking if apps need seeding...');
+    const appsCount = await this.appModel.countDocuments();
+    if (appsCount > 0) {
+      this.logger.log('Apps already seeded');
+      return;
+    }
 
-    for (const appData of SampleApps) {
-      const existingApp = await this.appModel.findOne({ name: appData.name });
+    const apps = [
+      {
+        name: 'Jiva Flow Frontend',
+        clientId: 'jiva-flow-web',
+        clientSecret: 'jiva-flow-secret',
+      },
+      {
+        name: 'Inventory App',
+        clientId: 'inventory-app',
+        clientSecret: 'inventory-secret',
+      },
+    ];
 
-      if (!existingApp) {
-        const clientId = crypto.randomBytes(16).toString('hex');
-        const clientSecret = crypto.randomBytes(32).toString('hex');
-
-        await this.appModel.create({
-          ...appData,
-          clientId,
-          clientSecret,
-        });
-
-        this.logger.log(`Created App: ${appData.name}`);
-        this.logger.log(`  clientId: ${clientId}`);
-        this.logger.log(`  clientSecret: ${clientSecret}`);
-      } else {
-        this.logger.log(`App already exists: ${appData.name}`);
-        this.logger.log(`  clientId: ${existingApp.clientId}`);
-        this.logger.log(`  clientSecret: ${existingApp.clientSecret}`);
-      }
+    for (const appData of apps) {
+      const app = new this.appModel(appData);
+      await app.save();
+      this.logger.log(`Seeded App: ${app.name} (ClientId: ${app.clientId})`);
     }
   }
 }

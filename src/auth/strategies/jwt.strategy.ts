@@ -12,14 +12,14 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     private authService: AuthService,
   ) {
     super({
-      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
+      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       secretOrKey: configService.get<string>('JWT_SECRET') || 'secretKey',
     });
   }
 
   async validate(payload: JwtPayload) {
-    const app = await this.authService.validateAppByClientId(payload.sub);
+    const app = await this.authService.validateAppByClientId(payload.clientId);
     if (!app) {
       throw new UnauthorizedException('App not found or disabled');
     }

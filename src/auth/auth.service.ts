@@ -1,8 +1,8 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { AppsService } from '@/apps/apps.service';
-import { AppResponse } from '@/apps/types/app.types';
-import { LoginResponse, JwtPayload } from './types/auth.types';
+import type { AppResponse } from '@/apps/types/app.types';
+import type { JwtPayload, LoginResponse } from './types/auth.types';
 
 @Injectable()
 export class AuthService {
@@ -20,15 +20,7 @@ export class AuthService {
   ): Promise<AppResponse | null> {
     const app = await this.appsService.validateApp(clientId, clientSecret);
     if (app) {
-      const appResponse: AppResponse = {
-        name: app.name,
-        clientId: app.clientId,
-        isActive: app.isActive,
-        createdAt: app.createdAt,
-        updatedAt: app.updatedAt,
-      };
-
-      return appResponse;
+      return app as AppResponse;
     }
     return null;
   }
@@ -45,7 +37,11 @@ export class AuthService {
     if (!app.isActive) {
       throw new UnauthorizedException('App is disabled');
     }
-    const payload: JwtPayload = { name: app.name, sub: app.clientId };
+    const payload: JwtPayload = {
+      sub: app._id,
+      name: app.name,
+      clientId: app.clientId,
+    };
     return {
       accessToken: this.jwtService.sign(payload),
       expiresIn: 3600,

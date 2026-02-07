@@ -10,6 +10,7 @@ import { QueueModule } from '@/queue/queue.module';
 import { RateLimiterGuard } from '@/rate-limiter/rate-limiter.guard';
 import { RateLimiterModule } from '@/rate-limiter/rate-limiter.module';
 import { RedisModule } from '@/redis/redis.module';
+import { SeederModule } from '@/seeder/seeder.module';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
@@ -19,11 +20,12 @@ import { APP_GUARD } from '@nestjs/core';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-    LoggerModule,
+    LlmModule,
     AppsModule,
     AuthModule,
     HealthModule,
-    LlmModule,
+    LoggerModule,
+    SeederModule,
     RateLimiterModule,
     DatabaseModule.forRootWithConfig(),
     RedisModule.forRootWithConfig(),

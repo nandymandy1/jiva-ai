@@ -7,6 +7,7 @@ import {
   DiskHealthIndicator,
 } from '@nestjs/terminus';
 import { RedisHealthIndicator } from './redis.health';
+import { LlmHealthIndicator } from './llm.health';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
 
 @ApiTags('Health')
@@ -18,6 +19,7 @@ export class HealthController {
     private memory: MemoryHealthIndicator,
     private disk: DiskHealthIndicator,
     private redis: RedisHealthIndicator,
+    private llm: LlmHealthIndicator,
   ) {}
 
   @Get()
@@ -40,6 +42,7 @@ export class HealthController {
           path: '/',
           thresholdPercent: 0.9,
         }),
+      () => this.llm.isHealthy('llm_backend'),
     ]);
   }
 }

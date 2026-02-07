@@ -1,5 +1,6 @@
 import {
   DynamicModule,
+  Global,
   Module,
   type OnModuleDestroy,
   type Provider,
@@ -19,6 +20,7 @@ import { QueueService } from './queue.service';
  * Provides BullMQ queue and worker management for the application
  * Integrates with Redis for job queue functionality
  */
+@Global()
 @Module({})
 export class QueueModule implements OnModuleDestroy {
   private static workers: Worker[] = [];

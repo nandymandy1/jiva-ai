@@ -36,6 +36,11 @@ export const QUEUE_NAMES = {
    * Queue for tenant-related background tasks
    */
   TENANT: 'jiva-ai-tenant',
+
+  /**
+   * Queue for LLM generation tasks
+   */
+  LLM: 'jiva-ai-llm',
 } as const;
 
 /**
@@ -71,8 +76,14 @@ export const JOB_TYPES = {
    * Tenant job types
    */
   TENANT: {
-    PROVISION: 'provision-tenant',
     CLEANUP: 'cleanup-tenant-data',
+  },
+
+  /**
+   * LLM job types
+   */
+  LLM: {
+    GENERATE: 'generate-text',
   },
 } as const;
 

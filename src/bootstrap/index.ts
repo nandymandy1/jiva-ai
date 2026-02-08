@@ -1,8 +1,13 @@
 import { NestFactory } from '@nestjs/core';
-import type { INestApplication, Type } from '@nestjs/common';
+import {
+  type INestApplication,
+  type Type,
+  ValidationPipe,
+} from '@nestjs/common';
 import { AppModule } from '@/app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { MyLogger } from '../logger/logger.service';
+import { json, urlencoded } from 'express';
 
 const bootstrap = async (): Promise<void> => {
   const app: INestApplication = await NestFactory.create(AppModule as Type, {
@@ -12,6 +17,31 @@ const bootstrap = async (): Promise<void> => {
   const logger = await app.resolve<MyLogger>(MyLogger);
   app.useLogger(logger);
   app.setGlobalPrefix('v1/api');
+
+  app.use(
+    json({
+      limit: '50mb',
+      type: ['application/json', 'text/plain'],
+    }),
+  );
+
+  app.use(
+    urlencoded({
+      limit: '50mb',
+      extended: true,
+    }),
+  );
+
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      transform: true,
+      forbidNonWhitelisted: true,
+      transformOptions: {
+        enableImplicitConversion: true,
+      },
+    }),
+  );
 
   const config = new DocumentBuilder()
     .setTitle('Jiva AI API')

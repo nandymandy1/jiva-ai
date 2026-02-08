@@ -1,5 +1,5 @@
 import { Injectable, Logger, type OnModuleDestroy } from '@nestjs/common';
-import { Queue } from 'bullmq';
+import { Job, Queue } from 'bullmq';
 import type { JobsOptions } from 'bullmq';
 
 @Injectable()
@@ -41,15 +41,18 @@ export class QueueService implements OnModuleDestroy {
     jobName: string,
     data: unknown,
     options?: JobsOptions,
-  ): Promise<void> {
+  ): Promise<Job> {
     const queue = this.getQueue(queueName);
     if (!queue) {
       throw new Error(`Queue ${queueName} not found`);
     }
 
     try {
-      await queue.add(jobName, data, options);
-      this.logger.log(`Job ${jobName} added to queue ${queueName}`);
+      const job = await queue.add(jobName, data, options);
+      this.logger.log(
+        `Job ${jobName} added to queue ${queueName} with ID ${job.id}`,
+      );
+      return job;
     } catch (error) {
       this.logger.error(
         `Error adding job ${jobName} to queue ${queueName}:`,

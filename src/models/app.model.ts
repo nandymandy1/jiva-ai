@@ -9,6 +9,9 @@ export class App {
   @Prop({ required: true, unique: true })
   name: string;
 
+  @Prop({ required: true, index: true })
+  createdBy: string;
+
   @Prop({ required: true, unique: true, index: true })
   clientId: string;
 
@@ -25,9 +28,7 @@ export class App {
 export const AppSchema = SchemaFactory.createForClass(App);
 
 AppSchema.pre('save', async function () {
-  if (!this.isModified('clientSecret')) {
-    return;
-  }
+  if (!this.isModified('clientSecret')) return;
   const salt = await bcrypt.genSalt(10);
   this.clientSecret = await bcrypt.hash(this.clientSecret, salt);
 });

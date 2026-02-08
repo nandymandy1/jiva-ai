@@ -14,6 +14,7 @@ import type {
   QueueModuleOptions,
 } from './types/queue.types';
 import { QueueService } from './queue.service';
+import { BullModule } from '@nestjs/bullmq';
 
 /**
  * Queue Module
@@ -100,9 +101,32 @@ export class QueueModule implements OnModuleDestroy {
 
     return {
       module: QueueModule,
-      imports: [ConfigModule],
+      imports: [
+        ConfigModule,
+        BullModule.forRootAsync({
+          imports: [ConfigModule],
+          useFactory: (configService: ConfigService) => ({
+            connection: {
+              host: configService.get<string>('REDIS_HOST') ?? 'localhost',
+              port: configService.get<number>('REDIS_PORT') ?? 6379,
+              password: configService.get<string>('REDIS_PASSWORD'),
+              db: configService.get<number>('REDIS_DB') ?? 0,
+            },
+            defaultJobOptions: {
+              attempts: QUEUE_DEFAULTS.ATTEMPTS,
+              backoff: {
+                type: QUEUE_DEFAULTS.BACKOFF_TYPE,
+                delay: QUEUE_DEFAULTS.BACKOFF_DELAY,
+              },
+              removeOnComplete: QUEUE_DEFAULTS.REMOVE_ON_COMPLETE,
+              removeOnFail: QUEUE_DEFAULTS.REMOVE_ON_FAIL,
+            },
+          }),
+          inject: [ConfigService],
+        }),
+      ],
       providers: queueProviders,
-      exports: [QueueService],
+      exports: [QueueService, BullModule],
     };
   }
 

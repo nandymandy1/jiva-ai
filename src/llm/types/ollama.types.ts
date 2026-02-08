@@ -22,4 +22,4 @@ export type OllamaTagsResponse = {
   models: OllamaModel[];
 };
 
-export type GenerateResponse = BaseDataResponse<{ jobId: string }>;
+export type AnalyseMedicinesResponse = BaseDataResponse<{ jobId: string }>;
